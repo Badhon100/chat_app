@@ -1,8 +1,8 @@
+import 'package:chat_app/app_start_screen.dart';
 import 'package:chat_app/core/di/injection.dart';
 import 'package:chat_app/core/providers/bloc_providers.dart';
-import 'package:chat_app/features/auth/presentation/bloc/auth_bloc.dart';
 import 'package:chat_app/features/auth/presentation/pages/auth_screen.dart';
-import 'package:chat_app/features/auth/presentation/pages/chat_screen.dart';
+import 'package:chat_app/features/chat/presentation/pages/chat_screen.dart';
 import 'package:chat_app/features/auth/presentation/pages/register_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -30,30 +30,14 @@ class MyApp extends StatelessWidget {
         title: 'Realtime Chat',
         theme: ThemeData(primarySwatch: Colors.blue),
 
-        /// ✅ ADD ALL ROUTES USED IN NAVIGATION
         routes: {
           '/login': (_) => const LoginScreen(),
           '/register': (_) => const RegisterScreen(),
           '/chat': (_) => const ChatScreen(),
         },
 
-        home: BlocBuilder<AuthBloc, AuthStates>(
-          builder: (context, state) {
-            if (state.isLoading) {
-              return const Scaffold(
-                body: Center(child: CircularProgressIndicator()),
-              );
-            }
-
-            /// ✅ If logged in → go to Chat
-            if (state.user != null) {
-              return const ChatScreen();
-            }
-
-            /// Otherwise → Login
-            return const LoginScreen();
-          },
-        ),
+        /// ✅ Start from splash/auth-check screen
+        home: const AppStartScreen(),
       ),
     );
   }
