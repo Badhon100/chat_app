@@ -69,12 +69,20 @@ class _ChatScreenState extends State<ChatScreen> {
             ),
             MessageInput(
               onSend: (text) {
+                final state = context.read<ChatBloc>().state;
+                final lastMsg = state.messages.isNotEmpty ? state.messages.last : null;
+                
+                var createdAt = DateTime.now();
+                if (lastMsg != null && createdAt.isBefore(lastMsg.createdAt)) {
+                  createdAt = lastMsg.createdAt.add(const Duration(milliseconds: 1));
+                }
+
                 final msg = MessageEntity(
                   id: const Uuid().v4(),
                   conversationId: widget.conversationId,
                   userId: userId,
                   text: text,
-                  createdAt: DateTime.now(),
+                  createdAt: createdAt,
                   status: MessageStatus.pending,
                 );
                 context.read<ChatBloc>().add(SendPressed(msg));
