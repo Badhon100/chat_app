@@ -59,13 +59,12 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
     } catch (e) {
       if (e is AuthException) {
         AppLogger.error('REGISTER ERROR: ${e.message}');
-        throw Exception(e.message); // cleaner message to UI
+        rethrow;
       }
 
       AppLogger.error('REGISTER EXCEPTION', e);
       rethrow;
     }
-
   }
 
   @override

@@ -30,9 +30,12 @@ class _RegisterScreenState extends State<RegisterScreen> {
                 Navigator.pushReplacementNamed(context, '/conversations');
               }
               if (state.error != null) {
-                ScaffoldMessenger.of(
-                  context,
-                ).showSnackBar(SnackBar(content: Text(state.error!)));
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(
+                    content: Text(state.error!),
+                    backgroundColor: Colors.red,
+                  ),
+                );
               }
             },
             builder: (context, state) {

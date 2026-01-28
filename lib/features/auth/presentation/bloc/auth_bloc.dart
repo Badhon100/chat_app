@@ -6,6 +6,7 @@ import 'package:equatable/equatable.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 import 'package:chat_app/features/auth/domain/usecases/logout_user.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 
 part 'auth_event.dart';
 part 'auth_state.dart';
@@ -35,7 +36,7 @@ class AuthBloc extends Bloc<AuthEvent, AuthStates> {
       final AppUser user = await loginUser(event.email, event.password);
       emit(state.copyWith(isLoading: false, user: user));
     } catch (e) {
-      emit(state.copyWith(isLoading: false, error: e.toString()));
+      emit(state.copyWith(isLoading: false, error: _mapErrorMessage(e)));
     }
   }
 
@@ -54,8 +55,26 @@ class AuthBloc extends Bloc<AuthEvent, AuthStates> {
       final AppUser user = await registerUser(event.email, event.password);
       emit(state.copyWith(isLoading: false, user: user));
     } catch (e) {
-      emit(state.copyWith(isLoading: false, error: e.toString()));
+      emit(state.copyWith(isLoading: false, error: _mapErrorMessage(e)));
     }
+  }
+
+  String _mapErrorMessage(Object e) {
+    if (e is AuthException) {
+      if (e.message.toLowerCase().contains('invalid login credentials')) {
+        return 'Incorrect email or password.';
+      }
+      if (e.message.toLowerCase().contains('user already registered')) {
+        return 'Email is already in use.';
+      }
+      return e.message;
+    }
+
+    final msg = e.toString();
+    if (msg.startsWith('Exception: ')) {
+      return msg.substring(11);
+    }
+    return msg;
   }
 
   void _onCheckAuth(AuthCheckRequested event, Emitter<AuthStates> emit) {
