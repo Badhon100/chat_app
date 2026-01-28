@@ -43,24 +43,45 @@ class MessageBubble extends StatelessWidget {
   }
 
   Widget _buildStatusText() {
-    if (!isMe) return const SizedBox.shrink();
+    final timeStr = "${message.createdAt.hour}:${message.createdAt.minute.toString().padLeft(2, '0')}";
+    
+    if (!isMe) {
+      return Text(
+        timeStr,
+        style: const TextStyle(fontSize: 10, color: Colors.grey),
+      );
+    }
+
+    String statusText = "";
+    Color statusColor = Colors.grey;
 
     switch (message.status) {
       case MessageStatus.pending:
-        return const Text(
-          "Pending...",
-          style: TextStyle(fontSize: 10, color: Colors.grey),
-        );
+        statusText = "Pending";
+        break;
       case MessageStatus.sent:
-        return const Text(
-          "Sent",
-          style: TextStyle(fontSize: 10, color: Colors.grey),
-        );
+        statusText = "Sent";
+        break;
       case MessageStatus.delivered:
-        return const Text(
-          "Delivered",
-          style: TextStyle(fontSize: 10, color: Colors.green),
-        );
+        statusText = "Delivered";
+        statusColor = Colors.green;
+        break;
     }
+    
+    return Row(
+      mainAxisSize: MainAxisSize.min,
+      mainAxisAlignment: MainAxisAlignment.end,
+      children: [
+        Text(
+          timeStr,
+          style: const TextStyle(fontSize: 10, color: Colors.grey),
+        ),
+        const SizedBox(width: 4),
+        Text(
+          statusText,
+          style: TextStyle(fontSize: 10, color: statusColor),
+        ),
+      ],
+    );
   }
 }

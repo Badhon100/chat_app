@@ -13,30 +13,92 @@ class MessageInput extends StatefulWidget {
 class _MessageInputState extends State<MessageInput> {
   final ctrl = TextEditingController();
   final stt = SpeechToText();
+  bool _isListening = false;
+  bool _isSpeechEnabled = false;
 
-  void startListening() async {
-    await stt.initialize();
-    stt.listen(
-      onResult: (res) {
-        setState(() => ctrl.text = res.recognizedWords);
-      },
-    );
+  @override
+  void initState() {
+    super.initState();
+    _initSpeech();
+  }
+
+  void _initSpeech() async {
+    try {
+      _isSpeechEnabled = await stt.initialize(
+        onError: (val) {
+          debugPrint('STT Error: $val');
+          if (val.errorMsg == 'error_no_match') {
+            ScaffoldMessenger.of(context).showSnackBar(
+              const SnackBar(
+                content: Text("No speech detected. Please try again."),
+              ),
+            );
+          }
+          setState(() => _isListening = false);
+        },
+        onStatus: (val) {
+          debugPrint('STT Status: $val');
+          if (val == 'done' || val == 'notListening') {
+            setState(() => _isListening = false);
+          }
+        },
+      );
+      setState(() {});
+    } catch (e) {
+      debugPrint("STT Init Error: $e");
+    }
+  }
+
+  void _toggleListening() async {
+    if (!_isSpeechEnabled) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text("Speech recognition not available")),
+      );
+      return;
+    }
+
+    if (_isListening) {
+      await stt.stop();
+      setState(() => _isListening = false);
+    } else {
+      await stt.listen(
+        onResult: (res) {
+          setState(() {
+            ctrl.text = res.recognizedWords;
+          });
+        },
+        listenFor: const Duration(seconds: 30),
+        pauseFor: const Duration(seconds: 3),
+        partialResults: true,
+        cancelOnError: true,
+        listenMode: ListenMode.dictation,
+      );
+      setState(() => _isListening = true);
+    }
   }
 
   void _sendMessage() {
     final text = ctrl.text.trim();
     if (text.isEmpty) return;
 
-    ChatEngineChannel.processMessage(text).then((processed) {
-      final processedText = processed.trim();
-      if (processedText.isNotEmpty) {
-        widget.onSend(processedText);
-      }
-    }).catchError((_) {
-      widget.onSend(text);
-    });
+    if (_isListening) {
+      stt.stop();
+      setState(() => _isListening = false);
+    }
 
+    // Force clear immediately to prevent double sends or UI lag
     ctrl.clear();
+
+    ChatEngineChannel.processMessage(text)
+        .then((processed) {
+          final processedText = processed.trim();
+          if (processedText.isNotEmpty) {
+            widget.onSend(processedText);
+          }
+        })
+        .catchError((_) {
+          widget.onSend(text);
+        });
   }
 
   @override
@@ -57,8 +119,11 @@ class _MessageInputState extends State<MessageInput> {
       child: Row(
         children: [
           IconButton(
-            icon: const Icon(Icons.mic, color: Colors.blueAccent),
-            onPressed: startListening,
+            icon: Icon(
+              _isListening ? Icons.mic : Icons.mic_none,
+              color: _isListening ? Colors.red : Colors.blueAccent,
+            ),
+            onPressed: _toggleListening,
           ),
           const SizedBox(width: 8),
           Expanded(
