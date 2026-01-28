@@ -5,6 +5,7 @@ import '../../../../core/utils/app_logger.dart';
 abstract class AuthRemoteDataSource {
   Future<UserModel> login(String email, String password);
   Future<UserModel> register(String email, String password);
+  Future<void> logout();
   UserModel? getCurrentUser();
 }
 
@@ -12,6 +13,11 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
   final SupabaseClient client;
 
   AuthRemoteDataSourceImpl(this.client);
+
+  @override
+  Future<void> logout() async {
+    await client.auth.signOut();
+  }
 
   @override
   Future<UserModel> login(String email, String password) async {

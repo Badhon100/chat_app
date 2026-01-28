@@ -4,11 +4,12 @@ import 'package:chat_app/core/providers/bloc_providers.dart';
 import 'package:chat_app/features/auth/presentation/pages/auth_screen.dart';
 import 'package:chat_app/features/chat/presentation/pages/chat_screen.dart';
 import 'package:chat_app/features/auth/presentation/pages/register_screen.dart';
+import 'package:chat_app/features/chat/presentation/pages/conversation_page.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
-void main() async{
+void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await Supabase.initialize(
     url: 'https://pwyakjgatlsmwwjippig.supabase.co',
@@ -33,10 +34,24 @@ class MyApp extends StatelessWidget {
         routes: {
           '/login': (_) => const LoginScreen(),
           '/register': (_) => const RegisterScreen(),
-          '/chat': (_) => const ChatScreen(),
+          '/conversations': (_) => const ConversationPage(),
         },
 
-        /// ✅ Start from splash/auth-check screen
+        onGenerateRoute: (settings) {
+          if (settings.name == '/chat') {
+            final args = settings.arguments;
+            if (args is Map<String, dynamic>) {
+              return MaterialPageRoute(
+                builder: (_) => ChatScreen(
+                  conversationId: args['conversationId'],
+                  otherUserEmail: args['otherUserEmail'] ?? 'Unknown',
+                ),
+              );
+            }
+          }
+          return null;
+        },
+
         home: const AppStartScreen(),
       ),
     );

@@ -5,19 +5,22 @@ import 'package:chat_app/features/auth/domain/usecases/register_user.dart';
 import 'package:equatable/equatable.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
+import 'package:chat_app/features/auth/domain/usecases/logout_user.dart';
+
 part 'auth_event.dart';
 part 'auth_state.dart';
-
 
 class AuthBloc extends Bloc<AuthEvent, AuthStates> {
   final LoginUser loginUser;
   final RegisterUser registerUser;
   final GetCurrentUser getCurrentUser;
+  final LogoutUser logoutUser;
 
   AuthBloc({
     required this.loginUser,
     required this.registerUser,
     required this.getCurrentUser,
+    required this.logoutUser,
   }) : super(const AuthStates()) {
     on<LoginSubmitted>(_onLogin);
     on<RegisterSubmitted>(_onRegister);
@@ -25,8 +28,7 @@ class AuthBloc extends Bloc<AuthEvent, AuthStates> {
     on<LogoutRequested>(_onLogout);
   }
 
-  Future<void> _onLogin(
-      LoginSubmitted event, Emitter<AuthStates> emit) async {
+  Future<void> _onLogin(LoginSubmitted event, Emitter<AuthStates> emit) async {
     emit(state.copyWith(isLoading: true, error: null));
 
     try {
@@ -38,7 +40,9 @@ class AuthBloc extends Bloc<AuthEvent, AuthStates> {
   }
 
   Future<void> _onRegister(
-      RegisterSubmitted event, Emitter<AuthStates> emit) async {
+    RegisterSubmitted event,
+    Emitter<AuthStates> emit,
+  ) async {
     emit(state.copyWith(isLoading: true, error: null));
 
     if (event.password != event.confirmPassword) {
@@ -47,8 +51,7 @@ class AuthBloc extends Bloc<AuthEvent, AuthStates> {
     }
 
     try {
-      final AppUser user =
-          await registerUser(event.email, event.password);
+      final AppUser user = await registerUser(event.email, event.password);
       emit(state.copyWith(isLoading: false, user: user));
     } catch (e) {
       emit(state.copyWith(isLoading: false, error: e.toString()));
@@ -61,8 +64,10 @@ class AuthBloc extends Bloc<AuthEvent, AuthStates> {
   }
 
   Future<void> _onLogout(
-      LogoutRequested event, Emitter<AuthStates> emit) async {
-    // You can add Supabase signOut usecase if required
+    LogoutRequested event,
+    Emitter<AuthStates> emit,
+  ) async {
+    await logoutUser();
     emit(const AuthStates());
   }
 }

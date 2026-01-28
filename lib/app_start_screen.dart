@@ -1,8 +1,8 @@
+import 'package:chat_app/features/chat/presentation/pages/conversation_page.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../features/auth/presentation/bloc/auth_bloc.dart';
 import '../../features/auth/presentation/pages/auth_screen.dart';
-import '../../features/chat/presentation/pages/chat_screen.dart';
 
 class AppStartScreen extends StatefulWidget {
   const AppStartScreen({super.key});
@@ -31,7 +31,7 @@ class _AppStartScreenState extends State<AppStartScreen> {
         }
 
         if (state.user != null) {
-          return const ChatScreen();
+          return const ConversationPage();
         }
 
         return const LoginScreen();

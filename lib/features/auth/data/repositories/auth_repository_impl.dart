@@ -13,5 +13,8 @@ class AuthRepositoryImpl implements AuthRepository {
   Future<AppUser> register(String e, String p) => remote.register(e, p);
 
   @override
+  Future<void> logout() => remote.logout();
+
+  @override
   AppUser? currentUser() => remote.getCurrentUser();
 }
