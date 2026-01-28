@@ -67,6 +67,3 @@ lib/
 ├── main.dart           # Application entry point
 ```
 
-## Contributing
-
-Contributions are welcome! Please feel free to submit a Pull Request.
